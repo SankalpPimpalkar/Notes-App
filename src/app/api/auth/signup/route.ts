@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
         console.log(savedUser);
 
         return NextResponse.json({
-            message: "User created!!",
+            message: "User created successfully",
             success: true,
             savedUser
         })

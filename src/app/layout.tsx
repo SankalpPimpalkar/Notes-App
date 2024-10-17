@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "Notes App",
@@ -20,6 +21,7 @@ export default function RootLayout({
         <div className="bg-gray-100 w-full min-h-screen">
           {children}
         </div>
+        <Toaster position="top-center" />
       </body>
     </html>
   );

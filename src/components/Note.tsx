@@ -6,7 +6,7 @@ export default function Note() {
     const [isStarred, setIsStarred] = useState(false)
 
     return (
-        <div className='bg-gray-200 px-7 py-5 w-full lg:max-w-[22rem] max-h-[17.5rem] rounded-lg hover:scale-105 transition-all duration-500 cursor-pointer'>
+        <div className='bg-gray-200 px-7 py-5 w-full min-h-[17.5rem] rounded-lg hover:scale-105 transition-all duration-500 cursor-pointer'>
             <div className='flex items-center justify-between'>
                 <h3 className='text-xl font-medium text-gray-500'>
                     Note title
