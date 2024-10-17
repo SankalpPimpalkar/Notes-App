@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 
+import Modal from '@/components/Modal';
 import Navbar from '@/components/Navbar';
 import Note from '@/components/Note'
 import axios from 'axios';
@@ -12,7 +13,9 @@ import toast from 'react-hot-toast';
 export default function App() {
 
   const router = useRouter();
-  const [userData, setUserData] = useState<any>(null)
+  const [userData, setUserData] = useState<any>(null);
+  const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false)
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
 
   const onLogout = async () => {
 
@@ -21,6 +24,14 @@ export default function App() {
       router.push('/auth/login');
       toast.success(response.data.message);
     }
+
+    setIsLogoutModalOpen(false);
+  }
+
+  const onCreateNote = async () => {
+
+
+    setIsCreateNoteModalOpen(false);
   }
 
   useEffect(() => {
@@ -36,11 +47,11 @@ export default function App() {
 
   return (
     <div className="bg-white w-full max-w-7xl mx-auto min-h-screen flex">
-      <Navbar />
+      <Navbar openLogoutModal={() => setIsLogoutModalOpen(true)} />
 
       <div className='w-full max-h-screen overflow-x-auto'>
         <div className='sticky flex items-center justify-between top-0 py-5 px-5 md:py-6 md:px-10 z-10 bg-white'>
-          <h1 className='text-3xl font-medium'>
+          <h1 className='text-xl md:text-3xl font-semibold'>
             Notes App
           </h1>
 
@@ -54,7 +65,7 @@ export default function App() {
               }
             </p>
 
-            <LogOut onClick={onLogout} className='block lg:hidden p-2 w-9 h-9 rounded-full text-gray-100 bg-gradient-to-r from-purple-700 to-pink-600 hover:scale-105 cursor-pointer' />
+            <LogOut onClick={() => setIsLogoutModalOpen(true)} className='block lg:hidden p-2 w-9 h-9 rounded-full text-gray-100 bg-gradient-to-r from-purple-700 to-pink-600 hover:scale-105 cursor-pointer' />
           </div>
         </div>
 
@@ -70,9 +81,9 @@ export default function App() {
           </span>
 
           <ul className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 items-center'>
-            <li className='border border-gray-200 hover:bg-gray-50 px-7 py-5 w-full h-full min-h-[17.5rem] flex items-center justify-center rounded-lg transition-all duration-500 cursor-pointer'>
-              <i className='bx bx-plus text-5xl text-gray-400'></i>
-            </li>
+            <button onClick={() => setIsCreateNoteModalOpen(true)} className='border border-indigo-200 hover:bg-indigo-50 px-7 py-5 w-full h-full min-h-[17.5rem] flex items-center justify-center rounded-lg transition-all duration-500 cursor-pointer'>
+              <i className='bx bx-plus text-5xl text-indigo-400'></i>
+            </button>
 
             {
               [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(note => (
@@ -82,6 +93,53 @@ export default function App() {
           </ul>
         </div>
       </div>
+
+      <Modal isOpen={isCreateNoteModalOpen}>
+        <h1 className='text-xl font-semibold'>
+          New Note
+        </h1>
+
+        <div className='mt-4'>
+          <input
+            type="text"
+            className='w-full py-3 px-1 text-lg bg-transparent outline-none text-gray-600'
+            placeholder='Note title'
+          />
+          <textarea
+            rows={4}
+            className='w-full py-3 px-1 text-lg bg-transparent outline-none text-gray-600'
+            placeholder='Your note...'
+          />
+        </div>
+
+        <div className='flex flex-row-reverse gap-4'>
+          <button onClick={onCreateNote} className='text-gray-100 bg-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-500'>
+            Create Note
+          </button>
+          <button onClick={() => setIsCreateNoteModalOpen(false)} className='text-gray-500 bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-200'>
+            Cancel
+          </button>
+        </div>
+      </Modal>
+
+      <Modal isOpen={isLogoutModalOpen}>
+        <h1 className='text-xl font-semibold'>
+          New Note
+        </h1>
+
+        <p className='mt-4 text-lg text-gray-600'>
+          Are you sure you want to logout ?
+        </p>
+
+        <div className='flex flex-row-reverse gap-4 mt-5'>
+          <button onClick={onLogout} className='text-gray-100 bg-black px-4 py-2 rounded-md hover:bg-black/90'>
+            Logout
+          </button>
+          <button onClick={() => setIsLogoutModalOpen(false)} className='text-gray-500 bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-200'>
+            Cancel
+          </button>
+        </div>
+      </Modal>
     </div>
   )
 }
