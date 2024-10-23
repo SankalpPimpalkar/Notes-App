@@ -14,11 +14,15 @@ export default function App() {
 
   const router = useRouter();
   const [userData, setUserData] = useState<any>(null);
-  const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false)
-  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+  const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [notes, setNotes] = useState([]);
+  const [newNote, setNewNote] = useState({
+    title: '',
+    description: ''
+  })
 
   const onLogout = async () => {
-
     const response = await axios.get('/api/auth/logout')
     if (response.data) {
       router.push('/auth/login');
@@ -29,9 +33,32 @@ export default function App() {
   }
 
   const onCreateNote = async () => {
+    const response = await axios.post('/api/note/add-note', newNote)
 
+    if (response.data) {
+      toast.success(response.data.message)
+      await getNotes()
+    }
 
     setIsCreateNoteModalOpen(false);
+  }
+
+  const handleDeleteNote = async (noteId: string) => {
+    const response = await axios.post('/api/note/delete-note', { noteId })
+
+    if (response.data) {
+      toast.success(response.data.message)
+      await getNotes();
+    }
+  }
+
+  const getNotes = async () => {
+    const response = await axios.get('/api/note/get-notes');
+
+    if (response.data) {
+      console.log("Notes", response.data);
+      setNotes(response.data.notes)
+    }
   }
 
   useEffect(() => {
@@ -44,6 +71,10 @@ export default function App() {
       }
     })();
   }, [])
+
+  useEffect(() => {
+    getNotes()
+  }, [isCreateNoteModalOpen])
 
   return (
     <div className="bg-white w-full max-w-7xl mx-auto min-h-screen flex">
@@ -80,14 +111,15 @@ export default function App() {
             />
           </span>
 
-          <ul className='grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 items-center'>
-            <button onClick={() => setIsCreateNoteModalOpen(true)} className='border border-indigo-200 hover:bg-indigo-50 px-7 py-5 w-full h-full min-h-[17.5rem] flex items-center justify-center rounded-lg transition-all duration-500 cursor-pointer'>
+          <ul className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 items-center'>
+            <button onClick={() => setIsCreateNoteModalOpen(true)} className='border border-indigo-200 hover:bg-indigo-50 px-7 py-5 w-full h-full min-h-32 max-h-[15rem] flex items-center justify-center rounded-lg transition-all duration-500 cursor-pointer'>
               <i className='bx bx-plus text-5xl text-indigo-400'></i>
             </button>
 
             {
-              [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(note => (
-                <Note key={note} />
+              notes.map((note: any) => (
+                <Note key={note?._id} noteData={note}
+                  deleteNote={handleDeleteNote} />
               ))
             }
           </ul>
@@ -104,11 +136,13 @@ export default function App() {
             type="text"
             className='w-full py-3 px-1 text-lg bg-transparent outline-none text-gray-600'
             placeholder='Note title'
+            onChange={(e) => setNewNote({ ...newNote, title: e.target.value })}
           />
           <textarea
             rows={4}
             className='w-full py-3 px-1 text-lg bg-transparent outline-none text-gray-600'
             placeholder='Your note...'
+            onChange={(e) => setNewNote({ ...newNote, description: e.target.value })}
           />
         </div>
 
@@ -124,7 +158,7 @@ export default function App() {
 
       <Modal isOpen={isLogoutModalOpen}>
         <h1 className='text-xl font-semibold'>
-          New Note
+          Logout
         </h1>
 
         <p className='mt-4 text-lg text-gray-600'>

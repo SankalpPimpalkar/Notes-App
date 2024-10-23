@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { connect } from "@/database/config";
-import User from "@/models/user.model";
 import { NextRequest, NextResponse } from "next/server";
-import jwt from "jsonwebtoken";
+import jwt from "jsonwebtoken"
+import User from "@/models/user.model";
 
 connect();
 

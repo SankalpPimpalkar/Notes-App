@@ -1,9 +1,13 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
+import formatMongoDate from '@/utils/formatDate';
 import React, { useState, useEffect } from 'react';
 
-export default function Note() {
+export default function Note({ noteData, deleteNote }: any) {
     const [isStarred, setIsStarred] = useState(false);
     const [bgColor, setBgColor] = useState('');
+
+    console.log("Note data", noteData)
 
     const bgColors = [
         'bg-red-200',
@@ -30,34 +34,50 @@ export default function Note() {
         setBgColor(randomColor);
     }, []);
 
-    return (
-        <div className={`${bgColor} px-7 py-5 w-full max-h-[19rem] rounded-lg cursor-pointer`}>
-            <div className='flex items-center justify-between'>
-                <h3 className='text-xl font-medium text-gray-700'>
-                    Note title
-                </h3>
+    useEffect(() => {
+        setIsStarred(noteData?.isStarred)
+    }, [noteData])
 
-                <button onClick={() => setIsStarred(!isStarred)}>
+    return (
+        <div className={`${bgColor} px-7 py-5 w-full flex flex-col items-start justify-between md:min-h-[15rem] rounded-lg cursor-pointer`}>
+
+            <div className='flex flex-col items-center justify-between w-full'>
+                <div className='flex items-center justify-between w-full'>
+                    <h3 className='text-xl font-medium text-gray-700'>
+                        {noteData?.title}
+                    </h3>
+
+                    <button onClick={() => setIsStarred(!isStarred)}>
+                        {
+                            isStarred ? (
+                                <i className='bx bxs-star text-2xl text-gray-500' />
+                            ) : (
+                                <i className='bx bx-star text-2xl text-gray-500' />
+                            )
+                        }
+                    </button>
+                </div>
+
+                <p className='mt-5 w-full text-pretty truncate text-base text-gray-500'>
                     {
-                        isStarred ? (
-                            <i className='bx bxs-star text-2xl text-gray-500' />
-                        ) : (
-                            <i className='bx bx-star text-2xl text-gray-500' />
-                        )
+                        noteData?.description
                     }
-                </button>
+                </p>
             </div>
 
-            <p className='mt-5 text-base text-gray-500 text-pretty'>
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Sit aut ipsam nisi fuga blanditiis eum veritatis quas optio, nesciunt eos ducimus maxime neque nobis cupiditate soluta quidem facilis odio aliquid.
-            </p>
 
-            <div className='mt-5 flex items-center justify-between'>
+            <div className='mt-5 w-full flex items-center justify-between'>
                 <h6 className='text-lg text-gray-600 text-pretty'>
-                    October 23, 2024
+                    {formatMongoDate(noteData?.createdAt)}
                 </h6>
 
-                <i className='bx bxs-pencil text-2xl text-gray-500' />
+                <div className='flex items-center gap-4'>
+                    <i className='bx bxs-pencil text-2xl text-gray-500' />
+
+                    <button onClick={() => deleteNote(noteData?._id)}>
+                        <i className='bx bxs-trash text-2xl text-gray-500'></i>
+                    </button>
+                </div>
             </div>
         </div>
     );
