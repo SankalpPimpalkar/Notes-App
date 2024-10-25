@@ -18,7 +18,7 @@ export default function App() {
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [notes, setNotes] = useState([]);
-  const [isLoadingNotes, setIsLoadingNotes] = useState(true);
+  const [isLoadingNotes, setIsLoadingNotes] = useState(false);
   const [newNote, setNewNote] = useState({
     title: '',
     description: ''
@@ -56,6 +56,7 @@ export default function App() {
   }
 
   const getNotes = async () => {
+    setIsLoadingNotes(true);
     const response = await axios.get('/api/note/get-notes');
 
     if (response.data) {
