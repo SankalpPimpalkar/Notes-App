@@ -1,10 +1,14 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client';
 import formatMongoDate from '@/utils/formatDate';
+import axios from 'axios';
+import { LoaderCircle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
-export default function Note({ noteData, deleteNote }: any) {
+export default function Note({ noteData, getNotes }: any) {
     const [isStarred, setIsStarred] = useState(false);
+    const [isDeletingNote, setIsDeletingNote] = useState(false);
     const [bgColor, setBgColor] = useState('');
 
     console.log("Note data", noteData)
@@ -28,6 +32,17 @@ export default function Note({ noteData, deleteNote }: any) {
         'bg-sky-200',
         'bg-emerald-200',
     ];
+
+    const handleDeleteNote = async () => {
+        setIsDeletingNote(true)
+        const response = await axios.post('/api/note/delete-note', { noteId: noteData?._id })
+
+        if (response.data) {
+            toast.success(response.data.message)
+            await getNotes();
+        }
+        setIsDeletingNote(false)
+    }
 
     useEffect(() => {
         const randomColor = bgColors[Math.floor(Math.random() * bgColors.length)];
@@ -74,9 +89,15 @@ export default function Note({ noteData, deleteNote }: any) {
                 <div className='flex items-center gap-4'>
                     <i className='bx bxs-pencil text-2xl text-gray-500' />
 
-                    <button onClick={() => deleteNote(noteData?._id)}>
-                        <i className='bx bxs-trash text-2xl text-gray-500'></i>
-                    </button>
+                    {
+                        isDeletingNote ? (
+                            <LoaderCircle className='animate-spin text-gray-500' />
+                        ) : (
+                            <button onClick={handleDeleteNote}>
+                                <i className='bx bxs-trash text-2xl text-gray-500'></i>
+                            </button>
+                        )
+                    }
                 </div>
             </div>
         </div>

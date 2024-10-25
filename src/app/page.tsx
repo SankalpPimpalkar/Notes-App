@@ -5,7 +5,7 @@ import Modal from '@/components/Modal';
 import Navbar from '@/components/Navbar';
 import Note from '@/components/Note'
 import axios from 'axios';
-import { LogOut } from 'lucide-react';
+import { LoaderCircle, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useState } from 'react'
 import toast from 'react-hot-toast';
@@ -14,9 +14,11 @@ export default function App() {
 
   const router = useRouter();
   const [userData, setUserData] = useState<any>(null);
+  const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [notes, setNotes] = useState([]);
+  const [isLoadingNotes, setIsLoadingNotes] = useState(true);
   const [newNote, setNewNote] = useState({
     title: '',
     description: ''
@@ -32,7 +34,16 @@ export default function App() {
     setIsLogoutModalOpen(false);
   }
 
+  const handleEnter = async (e: any) => {
+
+    if (e.code == 'Enter') {
+      await onCreateNote()
+    }
+  }
+
   const onCreateNote = async () => {
+
+    setIsCreatingNote(true);
     const response = await axios.post('/api/note/add-note', newNote)
 
     if (response.data) {
@@ -40,16 +51,8 @@ export default function App() {
       await getNotes()
     }
 
+    setIsCreatingNote(false);
     setIsCreateNoteModalOpen(false);
-  }
-
-  const handleDeleteNote = async (noteId: string) => {
-    const response = await axios.post('/api/note/delete-note', { noteId })
-
-    if (response.data) {
-      toast.success(response.data.message)
-      await getNotes();
-    }
   }
 
   const getNotes = async () => {
@@ -59,6 +62,7 @@ export default function App() {
       console.log("Notes", response.data);
       setNotes(response.data.notes)
     }
+    setIsLoadingNotes(false);
   }
 
   useEffect(() => {
@@ -74,10 +78,10 @@ export default function App() {
 
   useEffect(() => {
     getNotes()
-  }, [isCreateNoteModalOpen])
+  }, [])
 
   return (
-    <div className="bg-white w-full max-w-7xl mx-auto min-h-screen flex">
+    <div className="bg-white w-full max-w-7xl mx-auto min-h-dvh flex">
       <Navbar openLogoutModal={() => setIsLogoutModalOpen(true)} />
 
       <div className='w-full max-h-screen overflow-x-auto'>
@@ -112,15 +116,19 @@ export default function App() {
           </span>
 
           <ul className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 items-center'>
-            <button onClick={() => setIsCreateNoteModalOpen(true)} className='border border-indigo-200 hover:bg-indigo-50 px-7 py-5 w-full h-full min-h-32 max-h-[15rem] flex items-center justify-center rounded-lg transition-all duration-500 cursor-pointer'>
+            <button onClick={() => setIsCreateNoteModalOpen(true)} className='border border-indigo-200 hover:bg-indigo-50 px-7 py-5 w-full h-full min-h-32 md:min-h-[15rem] flex items-center justify-center rounded-lg transition-all duration-500 cursor-pointer'>
               <i className='bx bx-plus text-5xl text-indigo-400'></i>
             </button>
 
             {
-              notes.map((note: any) => (
-                <Note key={note?._id} noteData={note}
-                  deleteNote={handleDeleteNote} />
-              ))
+              isLoadingNotes ?
+                [1, 2, 3, 4, 5].map(noteSkeleton => (
+                  <div key={noteSkeleton} className='w-full h-full min-h-32 md:min-h-[15rem] bg-gray-200 rounded-lg animate-pulse' />
+                )) :
+                notes.map((note: any) => (
+                  <Note key={note?._id} noteData={note}
+                    getNotes={getNotes} />
+                ))
             }
           </ul>
         </div>
@@ -142,13 +150,17 @@ export default function App() {
             rows={4}
             className='w-full py-3 px-1 text-lg bg-transparent outline-none text-gray-600'
             placeholder='Your note...'
+            onKeyDown={handleEnter}
             onChange={(e) => setNewNote({ ...newNote, description: e.target.value })}
           />
         </div>
 
         <div className='flex flex-row-reverse gap-4'>
-          <button onClick={onCreateNote} className='text-gray-100 bg-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-500'>
-            Create Note
+          <button onClick={onCreateNote} disabled={isCreatingNote} className='text-gray-100 bg-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-500 flex items-center gap-2 disabled:bg-indigo-400'>
+            {
+              isCreatingNote && <LoaderCircle className='animate-spin' />
+            }
+            Create note
           </button>
           <button onClick={() => setIsCreateNoteModalOpen(false)} className='text-gray-500 bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-200'>
             Cancel
