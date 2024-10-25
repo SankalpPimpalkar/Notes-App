@@ -18,7 +18,7 @@ export default function RootLayout({
         <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet' />
       </head>
       <body className={`antialiased`}>
-        <div className="bg-gray-100 w-full min-h-screen">
+        <div className="bg-gray-100 w-full min-h-dvh">
           {children}
         </div>
         <Toaster position="top-center" />
