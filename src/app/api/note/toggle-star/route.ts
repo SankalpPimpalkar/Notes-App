@@ -6,12 +6,12 @@ import jwt from "jsonwebtoken";
 
 connect();
 
-export async function POST(request: NextRequest) {
+export async function PATCH(request: NextRequest) {
     try {
 
         const req = await request.json();
-        const { title, description } = req;
-        console.log(req)
+        const { noteId, isStarred } = req;
+        console.log("NoteId", noteId)
 
         const token = request.cookies.get('token')?.value || '';
 
@@ -23,31 +23,23 @@ export async function POST(request: NextRequest) {
 
         const decodedToken: any = jwt.verify(token, process.env.SECRET_TOKEN!);
 
-        if (!decodedToken || !decodedToken._id) {
+        if (!decodedToken) {
             return NextResponse.json({
-                error: "Invalid or expired token"
-            }, { status: 401 });
+                message: "Invalid token",
+                success: false
+            })
         }
 
-        const { _id } = decodedToken;
-
-        const newNote = await Note.create({
-            title,
-            description: description || 'No description',
-            user: _id,
-            isStarred: false
-        })
-
-        if (!newNote) {
-            return NextResponse.json({
-                error: "Note creation failed!!"
-            }, { status: 400 })
-        }
+        const note = await Note.findByIdAndUpdate(noteId, {
+            $set: {
+                isStarred: !isStarred
+            }
+        });
 
         return NextResponse.json({
-            message: "New Note Created!!",
+            message: isStarred ? "Note removed from starred!!" : "Note Added as starred!!",
             success: true,
-            note: newNote
+            note
         })
 
     } catch (error: any) {

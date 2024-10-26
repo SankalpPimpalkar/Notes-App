@@ -44,6 +44,16 @@ export default function Note({ noteData, getNotes }: any) {
         setIsDeletingNote(false)
     }
 
+    const handleisStarred = async () => {
+        const response = await axios.patch('/api/note/toggle-star', { noteId: noteData._id, isStarred });
+
+        if (response.data) {
+            console.log(response)
+            toast.success(response.data.message)
+            setIsStarred(!isStarred)
+        }
+    }
+
     useEffect(() => {
         const randomColor = bgColors[Math.floor(Math.random() * bgColors.length)];
         setBgColor(randomColor);
@@ -62,7 +72,7 @@ export default function Note({ noteData, getNotes }: any) {
                         {noteData?.title}
                     </h3>
 
-                    <button onClick={() => setIsStarred(!isStarred)}>
+                    <button onClick={handleisStarred}>
                         {
                             isStarred ? (
                                 <i className='bx bxs-star text-2xl text-gray-500' />

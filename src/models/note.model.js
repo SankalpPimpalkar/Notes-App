@@ -6,8 +6,7 @@ const noteSchema = new mongoose.Schema({
         type: String,
     },
     description: {
-        type: String,
-        required: true
+        type: String
     },
     isStarred: {
         type: Boolean,

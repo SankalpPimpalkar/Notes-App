@@ -71,14 +71,10 @@ export default function App() {
       const response = await axios.get('/api/auth/get-user')
 
       if (response.data) {
-        console.log(response.data);
         setUserData(response.data.user)
+        await getNotes()
       }
     })();
-  }, [])
-
-  useEffect(() => {
-    getNotes()
   }, [])
 
   return (
