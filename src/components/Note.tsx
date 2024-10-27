@@ -6,7 +6,7 @@ import { LoaderCircle } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
-export default function Note({ noteData, getNotes }: any) {
+export default function Note({ noteData, getNotes, setEditNote, setIsEditNoteModalOpen }: any) {
     const [isStarred, setIsStarred] = useState(noteData?.isStarred || false);
     const [isDeletingNote, setIsDeletingNote] = useState(false);
     const [bgColor, setBgColor] = useState('');
@@ -44,13 +44,18 @@ export default function Note({ noteData, getNotes }: any) {
         setIsDeletingNote(false)
     }
 
+    const handleEditNote = () => {
+        setEditNote(noteData);
+        setIsEditNoteModalOpen(true);
+    }
+
     const handleisStarred = async () => {
-        const response = await axios.patch('/api/note/toggle-star', { noteId: noteData._id, isStarred });
+        const response = await axios.patch('/api/note/toggle-star', { noteId: noteData?._id, isStarred });
 
         if (response.data) {
             console.log(response)
-            toast.success(response.data.message)
-            setIsStarred(!isStarred)
+            toast.success(response.data.message);
+            setIsStarred(!isStarred);
         }
     }
 
@@ -97,7 +102,10 @@ export default function Note({ noteData, getNotes }: any) {
                 </h6>
 
                 <div className='flex items-center gap-4'>
-                    <i className='bx bxs-pencil text-2xl text-gray-500' />
+
+                    <button onClick={handleEditNote}>
+                        <i className='bx bxs-pencil text-2xl text-gray-500' />
+                    </button>
 
                     {
                         isDeletingNote ? (

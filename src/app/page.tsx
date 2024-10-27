@@ -16,8 +16,11 @@ export default function App() {
   const [userData, setUserData] = useState<any>(null);
   const [isCreatingNote, setIsCreatingNote] = useState(false);
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
+  const [isEditNoteModalOpen, setIsEditNoteModalOpen] = useState(false);
+  const [editNote, setEditNote] = useState<any>({})
+  const [isEditingNote, setIsEditingNote] = useState(false)
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState<any>([]);
   const [isLoadingNotes, setIsLoadingNotes] = useState(true);
   const [newNote, setNewNote] = useState({
     title: '',
@@ -58,12 +61,32 @@ export default function App() {
     }
   }
 
+  const onEditNote = async () => {
+    setIsEditingNote(true);
+    try {
+      const response = await axios.patch('/api/note/edit-note', editNote);
+      if (response.data) {
+        await getNotes();
+        toast.success("Note Updated!!");
+      }
+
+    } catch (error) {
+      console.error("Failed to fetch notes", error);
+      toast.error("Failed to edit note.");
+    } finally {
+      setIsEditingNote(false);
+      setIsEditNoteModalOpen(false);
+    }
+  }
 
   const getNotes = async () => {
     try {
       const response = await axios.get('/api/note/get-notes');
       if (response.data) {
-        setNotes(response.data.notes || []);
+        const starredNotes = response.data.notes.filter((note: any) => note?.isStarred == true)
+        const unStarredNotes = response.data.notes.filter((note: any) => note?.isStarred != true)
+
+        setNotes([...starredNotes, ...unStarredNotes]);
       }
     } catch (error) {
       console.error("Failed to fetch notes", error);
@@ -79,7 +102,7 @@ export default function App() {
         const response = await axios.get('/api/auth/get-user');
         if (response.data) {
           setUserData(response.data.user);
-          await getNotes();
+          getNotes();
         }
       } catch (error) {
         console.error("Failed to fetch user data", error);
@@ -136,7 +159,7 @@ export default function App() {
                 )) :
                 notes.map((note: any) => (
                   <Note key={note?._id} noteData={note}
-                    getNotes={getNotes} />
+                    getNotes={getNotes} setIsEditNoteModalOpen={setIsEditNoteModalOpen} setEditNote={setEditNote} />
                 ))
             }
           </ul>
@@ -172,6 +195,42 @@ export default function App() {
             Create note
           </button>
           <button onClick={() => setIsCreateNoteModalOpen(false)} className='text-gray-500 bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-200'>
+            Cancel
+          </button>
+        </div>
+      </Modal>
+
+      <Modal isOpen={isEditNoteModalOpen}>
+        <h1 className='text-xl font-semibold'>
+          Edit note
+        </h1>
+
+        <div className='mt-4'>
+          <input
+            type="text"
+            className='w-full py-3 px-1 text-lg bg-transparent outline-none text-gray-600'
+            placeholder='Note title'
+            defaultValue={editNote?.title}
+            onChange={(e) => setEditNote({ ...editNote, title: e.target.value })}
+          />
+          <textarea
+            rows={4}
+            className='w-full py-3 px-1 text-lg bg-transparent outline-none text-gray-600'
+            placeholder='Your note...'
+            onKeyDown={handleEnter}
+            defaultValue={editNote?.description}
+            onChange={(e) => setEditNote({ ...editNote, description: e.target.value })}
+          />
+        </div>
+
+        <div className='flex flex-row-reverse gap-4'>
+          <button onClick={onEditNote} disabled={isEditingNote} className='text-gray-100 bg-indigo-600 px-4 py-2 rounded-md hover:bg-indigo-500 flex items-center gap-2 disabled:bg-indigo-400'>
+            {
+              isEditingNote && <LoaderCircle className='animate-spin' />
+            }
+            Edit note
+          </button>
+          <button onClick={() => setIsEditNoteModalOpen(false)} className='text-gray-500 bg-gray-300 px-4 py-2 rounded-md hover:bg-gray-200'>
             Cancel
           </button>
         </div>
