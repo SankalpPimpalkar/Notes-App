@@ -63,6 +63,7 @@ export default function App() {
 
   const onEditNote = async () => {
     setIsEditingNote(true);
+    console.log(editNote)
     try {
       const response = await axios.patch('/api/note/edit-note', editNote);
       if (response.data) {

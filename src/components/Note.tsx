@@ -11,8 +11,6 @@ export default function Note({ noteData, getNotes, setEditNote, setIsEditNoteMod
     const [isDeletingNote, setIsDeletingNote] = useState(false);
     const [bgColor, setBgColor] = useState('');
 
-    console.log("Note data", noteData)
-
     const bgColors = [
         'bg-red-200',
         'bg-yellow-200',

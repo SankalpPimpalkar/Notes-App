@@ -10,7 +10,7 @@ export async function PATCH(request: NextRequest) {
     try {
 
         const req = await request.json();
-        const { title, description, noteId } = req;
+        const { title, description, _id } = req;
 
         const token = request.cookies.get('token')?.value || '';
 
@@ -37,7 +37,7 @@ export async function PATCH(request: NextRequest) {
             updatedFields.description = description;
         }
 
-        const note = await Note.findByIdAndUpdate(noteId, { $set: updatedFields })
+        const note = await Note.findByIdAndUpdate(_id, { $set: updatedFields })
 
         if (!note) {
             return NextResponse.json({
