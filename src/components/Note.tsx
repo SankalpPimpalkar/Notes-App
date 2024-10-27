@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 
 export default function Note({ noteData, getNotes }: any) {
-    const [isStarred, setIsStarred] = useState(false);
+    const [isStarred, setIsStarred] = useState(noteData?.isStarred || false);
     const [isDeletingNote, setIsDeletingNote] = useState(false);
     const [bgColor, setBgColor] = useState('');
 
