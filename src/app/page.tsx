@@ -18,7 +18,7 @@ export default function App() {
   const [isCreateNoteModalOpen, setIsCreateNoteModalOpen] = useState(false);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [notes, setNotes] = useState([]);
-  const [isLoadingNotes, setIsLoadingNotes] = useState(false);
+  const [isLoadingNotes, setIsLoadingNotes] = useState(true);
   const [newNote, setNewNote] = useState({
     title: '',
     description: ''
@@ -42,40 +42,52 @@ export default function App() {
   }
 
   const onCreateNote = async () => {
-
     setIsCreatingNote(true);
-    const response = await axios.post('/api/note/add-note', newNote)
-
-    if (response.data) {
-      toast.success(response.data.message)
-      await getNotes()
+    try {
+      const response = await axios.post('/api/note/add-note', newNote);
+      if (response.data) {
+        toast.success(response.data.message);
+        await getNotes();
+      }
+    } catch (error) {
+      console.error("Failed to create note", error);
+      toast.error("Failed to create note.");
+    } finally {
+      setIsCreatingNote(false);
+      setIsCreateNoteModalOpen(false);
     }
-
-    setIsCreatingNote(false);
-    setIsCreateNoteModalOpen(false);
   }
 
-  const getNotes = async () => {
-    setIsLoadingNotes(true);
-    const response = await axios.get('/api/note/get-notes');
 
-    if (response.data) {
-      console.log("Notes", response.data);
-      setNotes(response.data.notes)
+  const getNotes = async () => {
+    try {
+      const response = await axios.get('/api/note/get-notes');
+      if (response.data) {
+        setNotes(response.data.notes || []);
+      }
+    } catch (error) {
+      console.error("Failed to fetch notes", error);
+      toast.error("Failed to load notes.");
+    } finally {
+      setIsLoadingNotes(false);
     }
-    setIsLoadingNotes(false);
   }
 
   useEffect(() => {
     (async () => {
-      const response = await axios.get('/api/auth/get-user')
-
-      if (response.data) {
-        setUserData(response.data.user)
-        await getNotes()
+      try {
+        const response = await axios.get('/api/auth/get-user');
+        if (response.data) {
+          setUserData(response.data.user);
+          await getNotes();
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data", error);
+        toast.error("Failed to load user data.");
       }
     })();
-  }, [])
+  }, []);
+
 
   return (
     <div className="bg-white w-full max-w-7xl mx-auto min-h-dvh flex">
